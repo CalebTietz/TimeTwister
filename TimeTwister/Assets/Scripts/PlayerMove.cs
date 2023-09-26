@@ -13,11 +13,11 @@ public class PlayerMove : MonoBehaviour
 
     public Rigidbody rb;
 
-    private Boolean canJump = true;
+    private Boolean canJump = false;
 
     private float speed = 5f;
+    private float jumpStrength = 7f;
     public int xdir = 0; // dir = 0 means not moving, dir = 1 means moving right, dir = -1 means moving left
-    public float maxJumpHeight = 5f;
 
     // Start is called before the first frame update
     void Start()
@@ -46,12 +46,12 @@ public class PlayerMove : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.W) && canJump) // jump
         {
-            velocity.y = 5;
+            velocity.y = jumpStrength;
+            canJump = false;
         }
-        if(!Input.GetKey(KeyCode.W) && !canJump && velocity.y > 0)
+        if(!Input.GetKey(KeyCode.W) && !canJump && velocity.y > 0) // stop jump if player lets go of jump button (just dampen it)
         {
-            Debug.Log("test");
-            velocity.y = 0;
+            velocity.y *= 0.99f;
         }
 
         pos.x += speed * xdir * Time.deltaTime;
@@ -65,5 +65,9 @@ public class PlayerMove : MonoBehaviour
         {
             canJump = true;
         }
+    }
+
+    private void onTriggerExit() {
+        Debug.Log("test");
     }
 }
