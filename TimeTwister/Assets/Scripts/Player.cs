@@ -67,4 +67,10 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void setPositionAndVelocity(Vector3 pos, Vector3 vel)
+    {
+        transform.position = pos;
+        rb.velocity = vel;
+    }
+
 }
