@@ -5,7 +5,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class PlayerMove : MonoBehaviour
+public class Player : MonoBehaviour
 {
 
     public GameObject player;
@@ -67,7 +67,4 @@ public class PlayerMove : MonoBehaviour
         }
     }
 
-    private void onTriggerExit() {
-        Debug.Log("test");
-    }
 }
