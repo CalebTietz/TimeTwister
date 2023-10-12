@@ -6,8 +6,10 @@ using UnityEngine;
 public class GameTime : MonoBehaviour
 {
 
-    private Dictionary<int, Dictionary<string, Vector3>> playerTracking = new Dictionary<int, Dictionary<string, Vector3>>();
+    private Dictionary<int, List<Dictionary<string, Vector3>>> playerTracking = new Dictionary<int, List<Dictionary<string, Vector3>>>();
     private GameObject player;
+    public GameObject playerClone;
+    private List<GameObject> currentClones;
 
     private int gameTime;
     // Start is called before the first frame update
@@ -23,9 +25,11 @@ public class GameTime : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.T))
         {
             gameTime -= 200;
-            if(gameTime < 0) { gameTime = 0; }
-            player.GetComponent<Player>().setPositionAndVelocity(playerTracking[gameTime]["pos"], playerTracking[gameTime]["vel"]);
+            if(gameTime < 1) { gameTime = 1; }
+            player.GetComponent<Player>().setPositionAndVelocity(playerTracking[gameTime][0]["pos"], playerTracking[gameTime][0]["vel"]);
         }
+
+        
     }
     
     // FixedUpdate is called 50 times every second
@@ -36,10 +40,24 @@ public class GameTime : MonoBehaviour
         Dictionary<string, Vector3> data = new Dictionary<string, Vector3>();
         data.Add("pos", player.transform.position);
         data.Add("vel", player.GetComponent<Rigidbody>().velocity);
-        if(playerTracking.ContainsKey(gameTime))
+        List<Dictionary<string, Vector3>> clones = new List<Dictionary<string, Vector3>>();
+        if (playerTracking.ContainsKey(gameTime))
         {
+            clones = playerTracking[gameTime];
+            clones.Add(data);
             playerTracking.Remove(gameTime);
+
+
+
         }
-        playerTracking.Add(gameTime, data);
+        playerTracking.Add(gameTime, clones);
+        List<Dictionary<string, Vector3>> cloneList = playerTracking[gameTime];
+        for (int i = 1; i < cloneList.Count; i++)
+        {
+            Dictionary<string, Vector3> cloneData = clones[i];
+            GameObject clone = Instantiate(playerClone);
+            clone.transform.position = cloneData["pos"];
+            clone.GetComponent<Rigidbody>().velocity = cloneData["velocity"];
+        }
     }
 }
