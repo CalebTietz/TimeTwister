@@ -9,20 +9,31 @@ public class Player : MonoBehaviour
 {
 
     public GameObject player;
-    public GameObject floor;
+    public GameObject Prefab_playerTracker;
+    private GameObject playerTracker;
 
-    public Rigidbody rb;
+    private Rigidbody rb;
 
     private Boolean canJump = false;
+    private int secondsToTrack = 6;
+    private int gameTime;
+    private int pastGameTime;
 
     private float speed = 5f;
     private float jumpStrength = 7f;
     public int xdir = 0; // dir = 0 means not moving, dir = 1 means moving right, dir = -1 means moving left
 
+    private Vector3[] playerTracking;
+
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        gameTime = 0;
+        pastGameTime = 0;
+        playerTracking = new Vector3[secondsToTrack * 50];
+
+        playerTracker = Instantiate(Prefab_playerTracker);
     }
 
     // Update is called once per frame
@@ -47,30 +58,73 @@ public class Player : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.W) && canJump) // jump
         {
             velocity.y = jumpStrength;
-            canJump = false;
         }
         if(!Input.GetKey(KeyCode.W) && !canJump && velocity.y > 0) // stop jump if player lets go of jump button (just dampen it)
         {
             velocity.y *= 0.99f;
         }
 
-        pos.x += speed * xdir * Time.deltaTime;
-        transform.position = pos;
-        rb.velocity = velocity;
-    }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if(collision.gameObject == floor)
+        if(Input.GetKeyDown(KeyCode.T)) // time travel and create clone
         {
-            canJump = true;
+            gameTime = pastGameTime;
+            GameObject.Find("playerClone").GetComponent<playerClone>().createClone(transform.position, new Vector3(xdir * speed, rb.velocity.y, 0));
+            transform.position = playerTracking[gameTime];
+        } else
+        { // move player
+            pos.x += speed * xdir * Time.deltaTime;
+            transform.position = pos;
+            rb.velocity = velocity;
+        }
+
+        CapsuleCollider myCapsuleCollider = GetComponent<CapsuleCollider>();
+        Vector3 point0 = myCapsuleCollider.transform.TransformPoint(myCapsuleCollider.center + Vector3.up * (myCapsuleCollider.height * 0.5f - myCapsuleCollider.radius));
+        Vector3 point1 = myCapsuleCollider.transform.TransformPoint(myCapsuleCollider.center + Vector3.down * (myCapsuleCollider.height * 0.5f - myCapsuleCollider.radius));
+        float radius = myCapsuleCollider.radius;
+
+        // Use Physics.OverlapCapsule with the retrieved information
+        Collider[] colliders = Physics.OverlapCapsule(point0, point1, radius);
+        foreach(Collider collider in colliders)
+        {
+            if(collider.gameObject.tag == "jumpableSurface")
+            {
+                canJump = true;
+                break;
+            }
+            else
+            {
+                canJump = false;
+            }
         }
     }
 
-    public void setPositionAndVelocity(Vector3 pos, Vector3 vel)
+    private void FixedUpdate()
     {
-        transform.position = pos;
-        rb.velocity = vel;
+        playerTracking[gameTime] = transform.position;
+        gameTime = (gameTime + 1) % (secondsToTrack * 50); // tick up gameTime by one and wrap around when (secondsToTrack) seconds of history is recorded
+        
+        pastGameTime = gameTime - (secondsToTrack - 1) * 50;
+        if (pastGameTime < 0)
+        {
+            pastGameTime += secondsToTrack * 50;
+        }
+
+        playerTracker.transform.position = playerTracking[pastGameTime]; // move playerTracker
     }
+
+    //private void OnCollisionEnter(Collision collision)
+    //{
+    //    Debug.Log(collision.gameObject.tag);
+    //    Debug.Log(rb.velocity.y);
+    //    if(collision.gameObject.tag == "jumpableSurface" && rb.velocity.y > -1)
+    //    {
+    //        canJump = true;
+    //    }
+    //}
+
+    //private void OnCollisionExit()
+    //{
+    //    canJump = false;
+    //}
 
 }
