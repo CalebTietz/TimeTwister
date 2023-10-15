@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class Player : MonoBehaviour
 {
@@ -25,6 +23,8 @@ public class Player : MonoBehaviour
 
     private Vector3[] playerTracking;
 
+    private Boolean teleporting = false; // Boolean flag to not track positon of player if the player is teleporting
+
     // Start is called before the first frame update
     void Start()
     {
@@ -37,7 +37,8 @@ public class Player : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update() {
+    void Update()
+    {
 
         Vector3 pos = transform.position;
         Vector3 velocity = rb.velocity;
@@ -46,7 +47,7 @@ public class Player : MonoBehaviour
         {
             xdir = 1;
         }
-        else if(Input.GetKeyDown(KeyCode.A) || Input.GetKey(KeyCode.A))
+        else if (Input.GetKeyDown(KeyCode.A) || Input.GetKey(KeyCode.A))
         {
             xdir = -1;
         }
@@ -55,22 +56,23 @@ public class Player : MonoBehaviour
             xdir = 0;
         }
 
-        if(Input.GetKeyDown(KeyCode.W) && canJump) // jump
+        if (Input.GetKeyDown(KeyCode.W) && canJump) // jump
         {
             velocity.y = jumpStrength;
         }
-        if(!Input.GetKey(KeyCode.W) && !canJump && velocity.y > 0) // stop jump if player lets go of jump button (just dampen it)
+        if (!Input.GetKey(KeyCode.W) && !canJump && velocity.y > 0) // stop jump if player lets go of jump button (just dampen it)
         {
             velocity.y *= 0.99f;
         }
 
 
-        if(Input.GetKeyDown(KeyCode.T)) // time travel and create clone
+        if (Input.GetKeyDown(KeyCode.LeftShift) && !teleporting) // time travel and create clone
         {
             gameTime = pastGameTime;
             GameObject.Find("playerClone").GetComponent<playerClone>().createClone(transform.position, new Vector3(xdir * speed, rb.velocity.y, 0));
-            transform.position = playerTracking[gameTime];
-        } else
+            StartCoroutine(teleportWithAnimation(player, playerTracking[gameTime], 1f, 0.5f));
+        }
+        else
         { // move player
             pos.x += speed * xdir * Time.deltaTime;
             transform.position = pos;
@@ -82,11 +84,11 @@ public class Player : MonoBehaviour
         Vector3 point1 = myCapsuleCollider.transform.TransformPoint(myCapsuleCollider.center + Vector3.down * (myCapsuleCollider.height * 0.5f - myCapsuleCollider.radius));
         float radius = myCapsuleCollider.radius;
 
-        // Use Physics.OverlapCapsule with the retrieved information
+        // Use Physicks.OverlapCapsule with the retrieved information
         Collider[] colliders = Physics.OverlapCapsule(point0, point1, radius);
-        foreach(Collider collider in colliders)
+        foreach (Collider collider in colliders)
         {
-            if(collider.gameObject.tag == "jumpableSurface")
+            if (collider.gameObject.tag == "jumpableSurface")
             {
                 canJump = true;
                 break;
@@ -100,31 +102,72 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        playerTracking[gameTime] = transform.position;
-        gameTime = (gameTime + 1) % (secondsToTrack * 50); // tick up gameTime by one and wrap around when (secondsToTrack) seconds of history is recorded
-        
-        pastGameTime = gameTime - (secondsToTrack - 1) * 50;
-        if (pastGameTime < 0)
+        if(!teleporting)
         {
-            pastGameTime += secondsToTrack * 50;
+            playerTracking[gameTime] = transform.position;
+            gameTime = (gameTime + 1) % (secondsToTrack * 50); // tick up gameTime by one and wrap around when (secondsToTrack) seconds of history is recorded
+            pastGameTime = gameTime - (secondsToTrack - 1) * 50;
+            if (pastGameTime < 0)
+            {
+                pastGameTime += secondsToTrack * 50;
+            }
+
+            playerTracker.transform.position = playerTracking[pastGameTime]; // move playerTracker
         }
 
-        playerTracker.transform.position = playerTracking[pastGameTime]; // move playerTracker
     }
 
-    //private void OnCollisionEnter(Collision collision)
-    //{
-    //    Debug.Log(collision.gameObject.tag);
-    //    Debug.Log(rb.velocity.y);
-    //    if(collision.gameObject.tag == "jumpableSurface" && rb.velocity.y > -1)
-    //    {
-    //        canJump = true;
-    //    }
-    //}
+    private IEnumerator teleportWithAnimation(GameObject player, Vector3 destination, float rise, float animationTime)
+    {
+        Debug.Log(destination.x);
+        teleporting = true;
+        Rigidbody rb = player.GetComponent<Rigidbody>();
+        rb.useGravity = false;
+        Vector3 pos = player.transform.position;
+        float zOff = 3f;
+        pos.z -= zOff;
+        player.transform.position = pos;
 
-    //private void OnCollisionExit()
-    //{
-    //    canJump = false;
-    //}
+        Renderer renderer = player.GetComponent<Renderer>();
+        Color color = renderer.material.color;
+
+        float alphaStep = color.a / (animationTime / 0.01f);
+        float riseStep = rise / (animationTime / 0.01f);
+
+        // move player up and fade out
+        while (color.a > 0)
+        {
+            color.a -= alphaStep;
+            renderer.material.color = color;
+
+            pos.y += riseStep;
+            player.transform.position = pos;
+            yield return new WaitForSeconds(0.01f);
+        }
+
+        // move player to new location
+        pos.x = destination.x;
+        pos.y = destination.y + rise;
+        player.transform.position = pos;
+
+        // move player down and fade in
+        while (color.a < 1)
+        {
+            color.a += alphaStep;
+            renderer.material.color = color;
+
+            pos.y -= riseStep;
+            player.transform.position = pos;
+            yield return new WaitForSeconds(0.01f);
+        }
+
+        // move player back in z direction
+        pos.z += zOff;
+        player.transform.position = pos;
+        teleporting = false;
+        rb.useGravity = true;
+    }
+
+
 
 }

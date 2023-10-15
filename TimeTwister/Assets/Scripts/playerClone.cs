@@ -17,7 +17,29 @@ public class playerClone : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        foreach (GameObject clone in clones)
+        {
+            CapsuleCollider myCapsuleCollider = clone.GetComponent<CapsuleCollider>();
+            Vector3 point0 = myCapsuleCollider.transform.TransformPoint(myCapsuleCollider.center + Vector3.up * (myCapsuleCollider.height * 0.5f - myCapsuleCollider.radius));
+            Vector3 point1 = myCapsuleCollider.transform.TransformPoint(myCapsuleCollider.center + Vector3.down * (myCapsuleCollider.height * 0.5f - myCapsuleCollider.radius));
+            float radius = myCapsuleCollider.radius;
 
+            // Use Physicks.OverlapCapsule with the retrieved information
+            Collider[] colliders = Physics.OverlapCapsule(point0, point1, radius);
+            foreach (Collider collider in colliders)
+            {
+
+                if (collider.gameObject.tag == "jumpableSurface")
+                {
+
+                }
+                else
+                {
+
+                }
+            }
+        }
+        
     }
 
     void FixedUpdate()
@@ -25,6 +47,7 @@ public class playerClone : MonoBehaviour
         
     }
 
+    // create clone with players current position and velocity
     public void createClone(Vector3 pos, Vector3 vel)
     {
         GameObject clone = Instantiate(GO_playerClone);
@@ -43,14 +66,16 @@ public class playerClone : MonoBehaviour
 
     }
 
+    // make a clone disappear
     private IEnumerator fadeAway(GameObject clone)
     {
-        Debug.Log("heyo");
         Renderer renderer = clone.GetComponent<Renderer>();
         Color color = renderer.material.color;
         float growth = 0.05f;
-        clone.GetComponent<Rigidbody>().isKinematic = true;
-        clone.GetComponent<CapsuleCollider>().enabled = false;
+        Vector3 pos = clone.transform.position;
+        pos.z -= 3f;
+        clone.transform.position = pos;
+        clone.GetComponent<Rigidbody>().useGravity = false;
         while(color.a > 0)
         {
             color.a -= 0.1f;
