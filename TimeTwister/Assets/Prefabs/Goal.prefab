@@ -383,7 +383,7 @@ GameObject:
   - component: {fileID: 3845259112988399143}
   - component: {fileID: 3835520133598688699}
   m_Layer: 0
-  m_Name: Cylinder
+  m_Name: winZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

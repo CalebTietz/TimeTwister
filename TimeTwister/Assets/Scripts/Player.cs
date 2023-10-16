@@ -173,6 +173,29 @@ public class Player : MonoBehaviour
         rb.useGravity = true;
     }
 
+    public IEnumerator levelEndFade(GameObject player, float rise, float animationTime)
+    {
+        Rigidbody rb = player.GetComponent<Rigidbody>();
+        rb.useGravity = false;
+        Vector3 pos = player.transform.position;
+        player.GetComponent<Collider>().enabled = false;
 
+        Renderer renderer = player.GetComponent<Renderer>();
+        Color color = renderer.material.color;
+
+        float alphaStep = color.a / (animationTime / 0.01f);
+        float riseStep = rise / (animationTime / 0.01f);
+
+        // move player up and fade out
+        while (color.a > 0)
+        {
+            color.a -= alphaStep;
+            renderer.material.color = color;
+
+            pos.y += riseStep;
+            player.transform.position = pos;
+            yield return new WaitForSeconds(0.01f);
+        }
+    }
 
 }
