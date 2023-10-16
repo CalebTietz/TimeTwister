@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3393644958170798801}
   m_Layer: 9
   m_Name: Button_Unpressed
-  m_TagString: jumpableSurface
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -49,6 +49,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unpressedButton: {fileID: 2209088162598816249}
   pressedButton: {fileID: 1981015914530762090, guid: 86712ef85e749304192c271d32f03051, type: 3}
+  isPressed: 0
 --- !u!65 &3393644958170798801
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -68,8 +69,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.2704196, y: 0.4502777, z: 1.2774038}
-  m_Center: {x: 0.012907982, y: 0.132173, z: 0.009348512}
+  m_Size: {x: 1.0291736, y: 0.44363618, z: 1.0118772}
+  m_Center: {x: 0.014586806, y: 0.13300133, z: 0.0012643933}
 --- !u!1 &6684365010731535919
 GameObject:
   m_ObjectHideFlags: 0

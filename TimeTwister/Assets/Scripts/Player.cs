@@ -34,6 +34,12 @@ public class Player : MonoBehaviour
         playerTracking = new Vector3[secondsToTrack * 50];
 
         playerTracker = Instantiate(Prefab_playerTracker);
+        Vector3 pos = player.transform.position;
+        
+        for(int i = 0; i < playerTracking.Length; i++)
+        {
+            playerTracking[i] = pos;
+        }
     }
 
     // Update is called once per frame
@@ -56,11 +62,11 @@ public class Player : MonoBehaviour
             xdir = 0;
         }
 
-        if (Input.GetKeyDown(KeyCode.W) && canJump) // jump
+        if ( (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.Space) ) && canJump) // jump
         {
             velocity.y = jumpStrength;
         }
-        if (!Input.GetKey(KeyCode.W) && !canJump && velocity.y > 0) // stop jump if player lets go of jump button (just dampen it)
+        if (!Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.Space) && !canJump && velocity.y > 0) // stop jump if player lets go of jump button (just dampen it)
         {
             velocity.y *= 0.99f;
         }
@@ -88,7 +94,7 @@ public class Player : MonoBehaviour
         Collider[] colliders = Physics.OverlapCapsule(point0, point1, radius);
         foreach (Collider collider in colliders)
         {
-            if (collider.gameObject.tag == "jumpableSurface")
+            if (collider.gameObject.tag == "jumpableSurface" && Mathf.Abs(rb.velocity.y) < 0.1f)
             {
                 canJump = true;
                 break;
@@ -119,7 +125,6 @@ public class Player : MonoBehaviour
 
     private IEnumerator teleportWithAnimation(GameObject player, Vector3 destination, float rise, float animationTime)
     {
-        Debug.Log(destination.x);
         teleporting = true;
         Rigidbody rb = player.GetComponent<Rigidbody>();
         rb.useGravity = false;

@@ -55,7 +55,6 @@ public class playerClone : MonoBehaviour
 
         if(clones.Count > maxClones)
         {
-            Debug.Log("test");
             StartCoroutine(fadeAway(clones[0]));
             clones.RemoveAt(0);
         }
