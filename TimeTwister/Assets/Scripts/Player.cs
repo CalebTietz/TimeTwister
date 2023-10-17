@@ -49,11 +49,11 @@ public class Player : MonoBehaviour
         Vector3 pos = transform.position;
         Vector3 velocity = rb.velocity;
 
-        if (Input.GetKeyDown(KeyCode.D) || Input.GetKey(KeyCode.D))
+        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) 
         {
             xdir = 1;
         }
-        else if (Input.GetKeyDown(KeyCode.A) || Input.GetKey(KeyCode.A))
+        else if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
         {
             xdir = -1;
         }
@@ -62,11 +62,11 @@ public class Player : MonoBehaviour
             xdir = 0;
         }
 
-        if ( (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.Space) ) && canJump) // jump
+        if ( (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow)) && canJump ) // jump
         {
             velocity.y = jumpStrength;
         }
-        if (!Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.Space) && !canJump && velocity.y > 0) // stop jump if player lets go of jump button (just dampen it)
+        if (!Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.Space) && !Input.GetKey(KeyCode.UpArrow) && !canJump && velocity.y > 0) // stop jump if player lets go of jump button (just dampen it)
         {
             velocity.y *= 0.99f;
         }
