@@ -6,6 +6,8 @@ TagManager:
   tags:
   - jumpableSurface
   - buttonPressed
+  - PlayButton
+  - QuitButton
   layers:
   - Default
   - TransparentFX

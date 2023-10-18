@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -60,6 +61,11 @@ public class Player : MonoBehaviour
         else
         {
             xdir = 0;
+        }
+
+        if(Input.GetKeyDown(KeyCode.R)) // restart level
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
         if ( (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow)) && canJump ) // jump
