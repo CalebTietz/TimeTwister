@@ -74,9 +74,8 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.LeftShift) && !teleporting) // time travel and create clone
         {
-            gameTime = pastGameTime;
             GameObject.Find("playerClone").GetComponent<playerClone>().createClone(transform.position, new Vector3(xdir * speed, rb.velocity.y, 0));
-            StartCoroutine(teleportWithAnimation(player, playerTracking[gameTime], 1f, 0.5f));
+            StartCoroutine(teleportWithAnimation(player, playerTracking[pastGameTime], 1f, 0.5f));
         }
         else
         { // move player
